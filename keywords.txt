@@ -1,0 +1,25 @@
+#######################################
+# Syntax Coloring Map For Ultrasound
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+TridentTD_Ubidots	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+wificonnect 	KEYWORD2
+loadAll 	KEYWORD2
+getValue 	KEYWORD2
+setValue 	KEYWORD2
+sendAll 	KEYWORD2
+getVersion      KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
