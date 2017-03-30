@@ -185,7 +185,7 @@ void TridentTD_Ubidots::setValue(String variable_name, double value){
   }
     
   if(currentValue>maxValues){
-    Serial.println(F("You are sending more than 5 consecutives variables, you just could send 10 variables. Then other variables will be deleted!"));
+    Serial.println(F("You are sending more than 10 consecutives variables, you just could send 10 variables. Then other variables will be deleted!"));
     currentValue = maxValues;
   }
 }
