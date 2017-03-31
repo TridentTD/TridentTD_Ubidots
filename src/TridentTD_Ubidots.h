@@ -5,7 +5,8 @@
  
  TridentTD_Ubidots.h - A simple client for UBIDOTS
 
- 20/06/2559 Buddism Era  (2016)
+ Version 1.0.0  20/06/2559 Buddism Era  (2016)
+ Version 1.0.1  31/03/2560 Buddism Era  (2017)
  
 
 Copyright (c) 2016 TridentTD
@@ -38,6 +39,7 @@ SOFTWARE.
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
+#include <Time.h>
 
 //#define  UBIDOTS_DEBUG_MODE
 
@@ -58,31 +60,53 @@ typedef struct Value {
 
 
 typedef struct Variable {
+  String device_id;
+  String device_name;
   String variable_id;
   String variable_name;
   time_t timestamp;
   float  last_value;
 } Variable;
 
+typedef struct Device {
+  String device_id;
+  String device_name;
+  uint8_t number_of_variables;
+} Device;
+
 class TridentTD_Ubidots {
    public:
       TridentTD_Ubidots(char* token);
       bool  wificonnect(char *ssid, char *pass);
-      bool  loadAll();
-      float getValue(String variable_name);
-      void  setValue(String variable_name, double value);
-      bool  sendAll();
+
+
+      bool   setDevice(String device_name);
+      float  getLastValue(String variable_name);
+	  time_t getLastTimeStamp(String variable_name);
+	  
+	  void   setValue(String variable_name, double value);
+	  bool   sendAll();  
+	  
 	  String getVersion();
    private:
-	  String _version="[Trident_Ubidots] Version 1.0.0";
-      char*   _token;
+	  String _version="[Trident_Ubidots] Version 1.0.1";
+      char*  _token;
+	  String _current_device_id;
+	  
       uint8_t maxValues;        // maxValues for send
       uint8_t currentValue;
       Value * val;
       
       uint8_t _variable_count;
-      Variable * ubidotsVar;
+      Variable * ubidotsVariables;
+	  
+	  uint8_t _device_count;
+	  Device * ubidotsDevices;
 
       HTTPClient       _http;
+	  
+	  bool   loadAllDevices();
+	  String getDeviceID(String device_name);
+
 };
 #endif /* _TRIDENTTD_UBIDOTS_H_ */

@@ -22,8 +22,10 @@ void setup() {
 }
 
 void loop() {
+   //---------- set the Ubidots's Device  ---------------------
+  ubidots.setDevice("miniNodeMCU"); 
 
-  //---------- Send values to Ubidots's VariableName  ---------------------
+  //---------- Send values to the VariableName of the Ubidots's Device ---------------------
   float h = dht.readHumidity();
   float t = dht.readTemperature();
 
@@ -32,7 +34,7 @@ void loop() {
   ubidots.setValue("TEMPERATURE", t);
   ubidots.setValue("HUMIDITY", h);
 
-  ubidots.sendAll();
+  ubidots.sendAll();   //send to the Ubidots's DeviceName
   Serial.println("[UBIDOTS] Data send.");
   
 }

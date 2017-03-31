@@ -5,7 +5,8 @@
  
  TridentTD_Ubidots.cpp - A simple client for UBIDOTS
 
- 20/06/2559 Buddism Era  (2016)
+ Version 1.0.0  20/06/2559 Buddism Era  (2016)
+ Version 1.0.1  31/03/2560 Buddism Era  (2017)
  
 
 Copyright (c) 2016 TridentTD
@@ -42,14 +43,20 @@ TridentTD_Ubidots::TridentTD_Ubidots(char* token){
     maxValues       = 10;  //
     currentValue    = 0;
     _variable_count = 30;
+	_device_count   = 10;
+	_current_device_id = "";
 
-    val        = (Value *)malloc(maxValues*sizeof(Value));
-    ubidotsVar = (Variable *)malloc(_variable_count*sizeof(Variable));
+    val              = (Value *)malloc(maxValues*sizeof(Value));
+    ubidotsVariables = (Variable *)malloc(_variable_count*sizeof(Variable));
+	ubidotsDevices   = (Device *)malloc(_device_count*sizeof(Device));
+	
 }
 
-
-bool TridentTD_Ubidots::loadAll(){
+bool TridentTD_Ubidots::loadAllDevices(){
   if(WiFi.status() != WL_CONNECTED){ return -1; }
+
+  //http://things.ubidots.com/api/v1.6/datasources?token={TOKEN}
+
   
   float num;
   String response;
@@ -58,8 +65,96 @@ bool TridentTD_Ubidots::loadAll(){
 
 
   //------------ Ubidots API ----------------------------
-  String url = "http://things.ubidots.com/api/v1.6/variables/";
+  String url = "http://things.ubidots.com/api/v1.6/datasources";
          url += "?token=";
+         url += _token;
+  _http.begin(url);
+
+  int httpCode = _http.GET();
+  if(httpCode > 0) {
+      //DEBUG_PRINT("[UBIDOTS] http code: "); DEBUG_PRINTLN(httpCode);
+      // file found at server
+      if(httpCode == HTTP_CODE_OK) {
+          String payload = _http.getString();
+          DEBUG_PRINTLN(payload);DEBUG_PRINTLN();
+		  
+          _http.end();
+
+          _device_count = payload.substring( 9+ payload.indexOf("\"count\":"), payload.indexOf(", \"next\"")).toInt();
+          
+          DEBUG_PRINT("Device Count:");DEBUG_PRINTLN(_device_count);DEBUG_PRINTLN();
+            
+          int start_idx = 12+ payload.indexOf("\"results\":");
+          for(byte i =0; i < _device_count ; i++){
+			start_idx   = payload.indexOf("{\"id\"",start_idx);
+            int end_idx = 1+ payload.indexOf("}", payload.indexOf("\"description\":" , start_idx) );
+            String device_json = payload.substring(start_idx,end_idx);
+			
+			DEBUG_PRINTLN(device_json);DEBUG_PRINTLN();
+			
+            start_idx = end_idx;
+
+            
+            (ubidotsDevices+i)->device_id   = device_json.substring( 8+ device_json.indexOf("{\"id\": \""),  device_json.indexOf("\", \"owner\""));
+            (ubidotsDevices+i)->device_name = device_json.substring( 9+ device_json.indexOf("\"name\": \""), device_json.indexOf("\", \"url\""));
+            (ubidotsDevices+i)->number_of_variables = device_json.substring( 23+ device_json.indexOf("\"number_of_variables\": "), device_json.indexOf(", \"last_activity\"")).toInt();
+
+            
+            DEBUG_PRINTLN((ubidotsDevices+i)->device_id);
+            DEBUG_PRINTLN((ubidotsDevices+i)->device_name);
+            DEBUG_PRINTLN((ubidotsDevices+i)->number_of_variables);
+			DEBUG_PRINTLN();
+          }
+          
+          return true;
+      }
+  } else {
+      DEBUG_PRINT("[HTTP] GET... failed, error: "); DEBUG_PRINTLN(_http.errorToString(httpCode).c_str());
+      _http.end();
+      return false;
+  }
+}
+
+String TridentTD_Ubidots::getDeviceID(String device_name){
+  if(WiFi.status() != WL_CONNECTED){ return ""; }
+  
+  String device_id = "";
+  
+  for(byte i =0; i < _device_count ; i++){
+    if((ubidotsDevices+i)->device_name == device_name ) {
+      device_id = ((ubidotsDevices+i)->device_id);
+	  DEBUG_PRINTLN(device_id);
+	  return device_id;
+    }
+  }
+  
+  return "";
+}
+
+bool  TridentTD_Ubidots::setDevice(String device_name){
+  if(WiFi.status() != WL_CONNECTED){ return -1; }
+ 
+  // load all VARIABLES from DEVICE_NAME
+  //http://things.ubidots.com/api/v1.6/datasources/[DEVICE_ID]/variables?token=[TOKEN]
+
+ 
+  float num;
+  String response;
+  int start_idx;
+  int end_idx;
+
+  _current_device_id = getDeviceID(device_name);
+  
+  if(_current_device_id == "") {
+	DEBUG_PRINT("[TRIDENTTD_UBIDOTS] Don't found ");
+	DEBUG_PRINT(device_name);
+    return -1;
+  }
+  
+  //------------ Ubidots API ----------------------------
+  String url = "http://things.ubidots.com/api/v1.6/datasources/";
+         url += _current_device_id;
+		 url += "/variables?token=";
          url += _token;
   _http.begin(url);
 
@@ -85,17 +180,19 @@ bool TridentTD_Ubidots::loadAll(){
 			DEBUG_PRINTLN(variable_json);
             start_idx = end_idx;
 
-            
-            (ubidotsVar+i)->variable_id   = variable_json.substring( 8+ variable_json.indexOf("{\"id\": \""),  variable_json.indexOf("\", \"name\""));
-            (ubidotsVar+i)->variable_name = variable_json.substring( 9+ variable_json.indexOf("\"name\": \""), variable_json.indexOf("\", \"icon\""));
-            (ubidotsVar+i)->timestamp     = variable_json.substring( 28+ variable_json.indexOf("\"last_value\": {\"timestamp\":"), variable_json.indexOf("\", \"value\"")).toFloat();
-            (ubidotsVar+i)->last_value    = variable_json.substring( 9+ variable_json.indexOf( "\"value\":" , variable_json.indexOf("\"last_value\": {\"timestamp\":")), variable_json.indexOf("\", \"context\"")).toFloat();
+            (ubidotsVariables+i)->device_id     = _current_device_id;
+			(ubidotsVariables+i)->device_name	= device_name;
+            (ubidotsVariables+i)->variable_id   = variable_json.substring( 8+ variable_json.indexOf("{\"id\": \""),  variable_json.indexOf("\", \"name\""));
+            (ubidotsVariables+i)->variable_name = variable_json.substring( 9+ variable_json.indexOf("\"name\": \""), variable_json.indexOf("\", \"icon\""));
+            (ubidotsVariables+i)->timestamp     = variable_json.substring( 28+ variable_json.indexOf("\"last_value\": {\"timestamp\":"), variable_json.indexOf("\", \"value\"")).toFloat();
+            (ubidotsVariables+i)->last_value    = variable_json.substring( 9+ variable_json.indexOf( "\"value\":" , variable_json.indexOf("\"last_value\": {\"timestamp\":")), variable_json.indexOf("\", \"context\"")).toFloat();
 
-            
-            DEBUG_PRINTLN((ubidotsVar+i)->variable_id);
-            DEBUG_PRINTLN((ubidotsVar+i)->variable_name);
-            DEBUG_PRINTLN((ubidotsVar+i)->timestamp);
-            DEBUG_PRINTLN((ubidotsVar+i)->last_value);
+            DEBUG_PRINTLN((ubidotsVariables+i)->device_id);
+            DEBUG_PRINTLN((ubidotsVariables+i)->device_name);            
+            DEBUG_PRINTLN((ubidotsVariables+i)->variable_id);
+            DEBUG_PRINTLN((ubidotsVariables+i)->variable_name);
+            DEBUG_PRINTLN((ubidotsVariables+i)->timestamp);
+            DEBUG_PRINTLN((ubidotsVariables+i)->last_value);
           }
           
           return true;
@@ -108,19 +205,17 @@ bool TridentTD_Ubidots::loadAll(){
 }
 
 
-float TridentTD_Ubidots::getValue(String variable_name){
+float TridentTD_Ubidots::getLastValue(String variable_name){
   if(WiFi.status() != WL_CONNECTED){ return -10000; }
   
-  float num;
-  String response;
-  int start_idx;
-  int end_idx;
-
-  String variable_id = "";
+  String variable_id="";
   
   for(byte i =0; i < _variable_count ; i++){
-    if((ubidotsVar+i)->variable_name == variable_name ) {
-      variable_id = ((ubidotsVar+i)->variable_id);
+    if((ubidotsVariables+i)->variable_name == variable_name ) {
+	  variable_id = ((ubidotsVariables+i)->variable_id);
+      float last_value = ((ubidotsVariables+i)->last_value);
+	  
+	  return last_value;
     }
   }
 
@@ -129,34 +224,27 @@ float TridentTD_Ubidots::getValue(String variable_name){
 	return -10002;
   }
 
-  //------------ Ubidots API ----------------------------
-  String url = "http://things.ubidots.com/api/v1.6/variables/";
-         url += variable_id;
-         url += "/values/?page_size=1&token=";
-         url += _token;
-  _http.begin(url);
+}
 
-  int httpCode = _http.GET();
-  if(httpCode > 0) {
-      //DEBUG_PRINT("[UBIDOTS] http code: "); DEBUG_PRINTLN(httpCode);
-      // file found at server
-      if(httpCode == HTTP_CODE_OK) {
-          String payload = _http.getString();
-          _http.end();
-
-          //DEBUG_PRINTLN(payload);
-          start_idx = 9+ payload.indexOf("\"value\":");
-          end_idx   = payload.indexOf(", \"timestamp\"");
-          num       = payload.substring(start_idx,end_idx).toFloat();
-          
-          //DEBUG_PRINTLN("[UBIDOTS] variable_id : "+ String(variable_id) + ";value : "+payload.substring(start_idx,end_idx));
-          return num;
-      }
-  } else {
-      //DEBUG_PRINT("[HTTP] GET... failed, error: "); DEBUG_PRINTLN(_http.errorToString(httpCode).c_str());
-      _http.end();
-      return -10001;
+time_t TridentTD_Ubidots::getLastTimeStamp(String variable_name){
+  if(WiFi.status() != WL_CONNECTED){ return -10000; }
+  
+  String variable_id="";
+  
+  for(byte i =0; i < _variable_count ; i++){
+    if((ubidotsVariables+i)->variable_name == variable_name ) {
+	  variable_id = ((ubidotsVariables+i)->variable_id);
+      float timestamp = ((ubidotsVariables+i)->timestamp);
+	  
+	  return timestamp;
+    }
   }
+
+  if(variable_id == "") {
+	Serial.println("[Ubidots] "+variable_name+" Not Found");
+	return -10002;
+  }
+
 }
 
 void TridentTD_Ubidots::setValue(String variable_name, double value){
@@ -166,8 +254,8 @@ void TridentTD_Ubidots::setValue(String variable_name, double value){
 
   String variable_id = "";
   for(byte i =0; i < _variable_count ; i++){
-    if((ubidotsVar+i)->variable_name == variable_name ) {
-      variable_id = ((ubidotsVar+i)->variable_id);
+    if((ubidotsVariables+i)->variable_name == variable_name ) {
+      variable_id = ((ubidotsVariables+i)->variable_id);
     }
   }
   if(variable_id == "") { return; }
@@ -185,7 +273,7 @@ void TridentTD_Ubidots::setValue(String variable_name, double value){
   }
     
   if(currentValue>maxValues){
-    Serial.println(F("You are sending more than 5 consecutives variables, you just could send 5 variables. Then other variables will be deleted!"));
+    Serial.println(F("You are sending more than 10 consecutives variables, you just could send 5 variables. Then other variables will be deleted!"));
     currentValue = maxValues;
   }
 }
@@ -252,6 +340,8 @@ bool TridentTD_Ubidots::wificonnect(char* ssid, char* pass){
   Serial.println();
   Serial.println("WiFi connected");
   Serial.print("IP address: "); Serial.println(WiFi.localIP());
+  
+  loadAllDevices();
 }
 
 String TridentTD_Ubidots::getVersion(){

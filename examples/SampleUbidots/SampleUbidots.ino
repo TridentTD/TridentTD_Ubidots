@@ -27,9 +27,10 @@ void setup() {
 
 void loop() {
 
-  //--------- Load values from Ubidots's VariableName ----------------------
-  ubidots.loadAll();
+  //---------- set the Ubidots's Device  ---------------------
+  ubidots.setDevice( "--- YOUR UBIDOTS'S DEVICENAME ---"); 
   
+  //---------- get value of the VARIABLENAME on specific Device
   int redstatus   = (int)ubidots.getValue("RED");   // the "RED" is Ubidots's VariableName
   int greenstatus = (int)ubidots.getValue("GREEN");
   int bluestatus  = (int)ubidots.getValue("BLUE");
@@ -38,7 +39,7 @@ void loop() {
       digitalWrite(GREEN_LED,greenstatus);
       digitalWrite(BLUE_LED, bluestatus);
 
-  //---------- Send values to Ubidots's VariableName  ---------------------
+  //---------- Send values to the VariableName on specific Device  ---------------------
   ubidots.setValue("LDR", analogRead(A0));          // the "LDR" is Ubidots's VariableName
 
   ubidots.sendAll();

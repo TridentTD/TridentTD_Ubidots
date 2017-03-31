@@ -7,12 +7,13 @@ http://ubidots.com/ to  receive or send data in the simplest method.
 You can use ubidots client like this
 
 - TridentTD_Ubidots ubidots;
-- ubidots.wificonnect(ssid,password);
-- ubidots.loadAll();
-- ubidots.getValue( ubidots_varaible_name);
-- ubidots.setValue( ubidots_variable_name, value);
+- ubidots.wificonnect( ssid,password );
+- ubidots.setDevice( ubidots\_device_name )
+- ubidots.getLastValue( ubidots\_varaible_name );
+- ubidots.getLastTimeStamp( ubidots\_varaible_name );
+- ubidots.setValue( ubidots\_variable_name, value);
 - ubidots.sendAll();
 - ubidots.getVersion();
 
 ##Version
-1.0.0
+1.0.1
