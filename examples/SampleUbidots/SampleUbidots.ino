@@ -31,9 +31,9 @@ void loop() {
   ubidots.setDevice( "--- YOUR UBIDOTS'S DEVICENAME ---"); 
   
   //---------- get value of the VARIABLENAME on specific Device
-  int redstatus   = (int)ubidots.getValue("RED");   // the "RED" is Ubidots's VariableName
-  int greenstatus = (int)ubidots.getValue("GREEN");
-  int bluestatus  = (int)ubidots.getValue("BLUE");
+  int redstatus   = (int)ubidots.getLastValue("RED");   // the "RED" is Ubidots's VariableName
+  int greenstatus = (int)ubidots.getLastValue("GREEN");
+  int bluestatus  = (int)ubidots.getLastValue("BLUE");
   
       digitalWrite(RED_LED,  redstatus);            // the RED_LED is ESP8266's I/O pin
       digitalWrite(GREEN_LED,greenstatus);
