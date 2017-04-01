@@ -40,7 +40,6 @@ SOFTWARE.
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
-#include <Time.h>
 
 //#define  UBIDOTS_DEBUG_MODE
 
