@@ -94,8 +94,8 @@ class TridentTD_Ubidots {
       char*  _token;
 	  String _current_device_id;
 	  
-      uint8_t maxValues;        // maxValues for send
-      uint8_t currentValue;
+      uint8_t _maxValues;        // maxValues for send
+      uint8_t _val_count;
       Value * val;
       
       uint8_t _variable_count;
