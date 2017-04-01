@@ -38,17 +38,17 @@ SOFTWARE.
  * Constructor.
  */
 TridentTD_Ubidots::TridentTD_Ubidots(char* token){
-    _token = token;
-    _maxValues         = 10;  //
-    _val_count      = 0;
-    _variable_count    = 20;
-	_device_count      = 10;
-	_current_device_id = "";
+  _token = token;
+  _maxValues         = 10;  //
+  _val_count         = 0;
+  _variable_count    = 20;
+  _device_count      = 10;
+  _current_device_id = "";
+  
+  val              = (Value *)malloc(_maxValues*sizeof(Value));
+  ubidotsVariables = (Variable *)malloc(_variable_count*sizeof(Variable));
+  ubidotsDevices   = (Device *)malloc(_device_count*sizeof(Device));
 
-    val              = (Value *)malloc(_maxValues*sizeof(Value));
-    ubidotsVariables = (Variable *)malloc(_variable_count*sizeof(Variable));
-	ubidotsDevices   = (Device *)malloc(_device_count*sizeof(Device));
-	
 }
 
 bool TridentTD_Ubidots::loadAllDevices(){

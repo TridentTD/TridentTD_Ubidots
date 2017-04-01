@@ -76,40 +76,35 @@ typedef struct Device {
 } Device;
 
 class TridentTD_Ubidots {
-   public:
-      TridentTD_Ubidots(char* token);
-      bool  wificonnect(char *ssid, char *pass);
-
-
-      bool   setDevice(String device_name);
-      float  getLastValue(String variable_name);
-	  time_t getLastTimeStamp(String variable_name);
-	  
-	  void   setValue(String variable_name, double value);
-	  bool   sendAll();  
-	  
-	  String getVersion();
-   private:
-	  String _version="[Trident_Ubidots] Version 1.0.2";
-      char*  _token;
-	  String _current_device_id;
-	  
-      uint8_t _maxValues;        // maxValues for send
-      uint8_t _val_count;
-      Value * val;
-      
-      uint8_t _variable_count;
-      Variable * ubidotsVariables;
-	  
-	  uint8_t _device_count;
-	  Device * ubidotsDevices;
-
-      HTTPClient       _http;
-	  
-	  bool   loadAllDevices();
-	  String getDeviceID(String device_name);
-	  String getVariableID(String variable_name);
-
-
+  public:
+    TridentTD_Ubidots(char* token);
+    bool   wificonnect(char *ssid, char *pass);
+    bool   setDevice(String device_name);
+    float  getLastValue(String variable_name);
+    time_t getLastTimeStamp(String variable_name);
+    void   setValue(String variable_name, double value);
+    bool   sendAll();  
+    
+    String getVersion();
+  private:
+    String  _version="[Trident_Ubidots] Version 1.0.2";
+    char*   _token;
+    String  _current_device_id;
+    
+    uint8_t _maxValues;        // maxValues for send
+    uint8_t _val_count;
+    Value*  val;
+    
+    uint8_t   _variable_count;
+    Variable* ubidotsVariables;
+    
+    uint8_t   _device_count;
+    Device*   ubidotsDevices;
+    
+    HTTPClient  _http;
+    
+    bool   loadAllDevices();
+    String getDeviceID(String device_name);
+    String getVariableID(String variable_name);
 };
 #endif /* _TRIDENTTD_UBIDOTS_H_ */
