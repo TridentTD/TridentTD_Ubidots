@@ -39,13 +39,13 @@ SOFTWARE.
  */
 TridentTD_Ubidots::TridentTD_Ubidots(char* token){
     _token = token;
-    maxValues       = 10;  //
-    currentValue    = 0;
-    _variable_count = 20;
-	_device_count   = 10;
+    _maxValues         = 10;  //
+    _val_count      = 0;
+    _variable_count    = 20;
+	_device_count      = 10;
 	_current_device_id = "";
 
-    val              = (Value *)malloc(maxValues*sizeof(Value));
+    val              = (Value *)malloc(_maxValues*sizeof(Value));
     ubidotsVariables = (Variable *)malloc(_variable_count*sizeof(Variable));
 	ubidotsDevices   = (Device *)malloc(_device_count*sizeof(Device));
 	
@@ -274,34 +274,33 @@ void TridentTD_Ubidots::setValue(String variable_name, double value){
 
   String variable_id = getVariableID(variable_name);  
   
-  if(currentValue==0){
+  if(_val_count==0){
 	  variable_idx=0;
 	  
 	  (val+variable_idx)->variable_id = variable_id;
 	  (val+variable_idx)->value       = value;
 	  
-	  currentValue++;
+	  _val_count++;
   } else {
-	  for(byte i = 0; i < currentValue ; i++){
+	for(byte i = 0; i < _val_count ; i++){
 		if((val+i)->variable_id == variable_id ) {
 			variable_idx = i;
 			(val+variable_idx)->value  = value;
 		}
-	  }
-	  
-	  if(variable_idx == -1)
-		  if( currentValue <= maxValues){
-			variable_idx = currentValue;
+	}
+
+	if(variable_idx == -1) {
+		if( _val_count <= _maxValues){
+			variable_idx = _val_count;
 			(val+variable_idx)->variable_id = variable_id;
 			(val+variable_idx)->value       = value;
-		  
-			currentValue++;
-		  } else {
-			Serial.println("[Trident_Ubidots] You are sending more than 10 consecutives variables, you just could send 10 variables. Then other variables will be deleted!");
-		  }
-	  }
-  }
 
+			_val_count++;
+		} else {
+			Serial.println("[Trident_Ubidots] You are sending more than 10 consecutives variables, you just could send 10 variables. Then other variables will be deleted!");
+		}
+	}
+  }
 }
 
 bool TridentTD_Ubidots::sendAll(){
@@ -309,7 +308,7 @@ bool TridentTD_Ubidots::sendAll(){
     String  allvalues;
 
     allvalues = "[";	
-    for(byte i=0; i< currentValue; i++){
+    for(byte i=0; i< _val_count; i++){
 
         allvalues += "{\"variable\": \"";
         allvalues += (val + i)->variable_id;
@@ -317,14 +316,14 @@ bool TridentTD_Ubidots::sendAll(){
         allvalues += (val + i)->value;
         allvalues += "}";
 
-        if(i<currentValue-1){ allvalues += ", "; }
+        if(i<_val_count-1){ allvalues += ", "; }
 		
     }
     allvalues += "]";
     
     DEBUG_PRINTLN("[UBIDOTS] allvalues : " +allvalues);
 
-    currentValue=0;  // reset ตัวแปร value
+    _val_count=0;  // reset ตัวแปร value
 
   //------------ Ubidots API ----------------------------
   //http://things.ubidots.com/api/v1.6/collections/values
