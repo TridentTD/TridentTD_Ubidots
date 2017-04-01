@@ -5,8 +5,9 @@
  
  TridentTD_Ubidots.cpp - A simple client for UBIDOTS
 
- Version 1.0.0  20/06/2559 Buddism Era  (2016)
- Version 1.0.1  31/03/2560 Buddism Era  (2017)
+ Version 1.0.0  20/06/2559 Buddism Era  (2016)  for old ubidots interface
+ Version 1.0.1  31/03/2560 Buddism Era  (2017)  for new ubidots interface
+ Version 1.0.2  01/04/2560 Buddism Era  (2017)  bug fix
  
 
 Copyright (c) 2016 TridentTD
@@ -40,7 +41,7 @@ TridentTD_Ubidots::TridentTD_Ubidots(char* token){
     _token = token;
     maxValues       = 10;  //
     currentValue    = 0;
-    _variable_count = 30;
+    _variable_count = 20;
 	_device_count   = 10;
 	_current_device_id = "";
 
@@ -245,62 +246,89 @@ time_t TridentTD_Ubidots::getLastTimeStamp(String variable_name){
 
 }
 
-void TridentTD_Ubidots::setValue(String variable_name, double value){
-  uint8_t i;
-  int8_t variable_idx = -1;
-
-
+String TridentTD_Ubidots::getVariableID(String variable_name){
+  if(WiFi.status() != WL_CONNECTED){ return ""; }
+  
+  String device_id   = "";
   String variable_id = "";
+
+  device_id =_current_device_id;  
+  //if(_current_device_id == "") { return; }
+
+  
   for(byte i =0; i < _variable_count ; i++){
-    if((ubidotsVariables+i)->variable_name == variable_name ) {
+    if((ubidotsVariables+i)->variable_name == variable_name 
+		&& (ubidotsVariables+i)->device_id == device_id ) {
       variable_id = ((ubidotsVariables+i)->variable_id);
+	  DEBUG_PRINTLN(variable_name+":"+variable_id);
+	  return variable_id;
     }
   }
-  if(variable_id == "") { return; }
+  
+  return "";
+}
 
-  for(i=0; i<= currentValue; i++){
-    if( (val+i)->variable_id == variable_id) { variable_idx = i; }
+void TridentTD_Ubidots::setValue(String variable_name, double value){
+
+  int8_t variable_idx = -1;
+
+  String variable_id = getVariableID(variable_name);  
+  
+  if(currentValue==0){
+	  variable_idx=0;
+	  
+	  (val+variable_idx)->variable_id = variable_id;
+	  (val+variable_idx)->value       = value;
+	  
+	  currentValue++;
+  } else {
+	  for(byte i = 0; i < currentValue ; i++){
+		if((val+i)->variable_id == variable_id ) {
+			variable_idx = i;
+			(val+variable_idx)->value  = value;
+		}
+	  }
+	  
+	  if(variable_idx == -1)
+		  if( currentValue <= maxValues){
+			variable_idx = currentValue;
+			(val+variable_idx)->variable_id = variable_id;
+			(val+variable_idx)->value       = value;
+		  
+			currentValue++;
+		  } else {
+			Serial.println("[Trident_Ubidots] You are sending more than 10 consecutives variables, you just could send 10 variables. Then other variables will be deleted!");
+		  }
+	  }
   }
-  if(variable_idx == -1) {
-    (val+currentValue)->variable_id = variable_id;
-    (val+currentValue)->value_id = value;
-    currentValue++;
-  }else{
-    (val+variable_idx)->variable_id = variable_id;
-    (val+variable_idx)->value_id = value;
-  }
-    
-  if(currentValue>maxValues){
-    Serial.println(F("You are sending more than 10 consecutives variables, you just could send 10 variables. Then other variables will be deleted!"));
-    currentValue = maxValues;
-  }
+
 }
 
 bool TridentTD_Ubidots::sendAll(){
-    int i;
-    String allvalues;
-    String str;
-    allvalues = "[";
-    for(i=0; i<currentValue;){
-        str = String(((val+i)->value_id),5);
+
+    String  allvalues;
+
+    allvalues = "[";	
+    for(byte i=0; i< currentValue; i++){
+
         allvalues += "{\"variable\": \"";
-        allvalues += String((val + i)->variable_id);
+        allvalues += (val + i)->variable_id;
         allvalues += "\", \"value\":";
-        allvalues += str;
+        allvalues += (val + i)->value;
         allvalues += "}";
-        i++;
-        if(i<currentValue){
-            allvalues += ", "; 
-        }
+
+        if(i<currentValue-1){ allvalues += ", "; }
+		
     }
     allvalues += "]";
-    i = allvalues.length();
-
-    currentValue=1;  // reset ตัวแปร value
     
     DEBUG_PRINTLN("[UBIDOTS] allvalues : " +allvalues);
 
+    currentValue=0;  // reset ตัวแปร value
+
   //------------ Ubidots API ----------------------------
+  //http://things.ubidots.com/api/v1.6/collections/values
+  
   String url = "http://things.ubidots.com/api/v1.6/collections/values/?token=";
          url += _token;
   _http.begin(url);

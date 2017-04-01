@@ -5,8 +5,9 @@
  
  TridentTD_Ubidots.h - A simple client for UBIDOTS
 
- Version 1.0.0  20/06/2559 Buddism Era  (2016)
- Version 1.0.1  31/03/2560 Buddism Era  (2017)
+ Version 1.0.0  20/06/2559 Buddism Era  (2016)  for old ubidots interface
+ Version 1.0.1  31/03/2560 Buddism Era  (2017)  for new ubidots interface
+ Version 1.0.2  01/04/2560 Buddism Era  (2017)  bug fix
  
 
 Copyright (c) 2016 TridentTD
@@ -55,7 +56,7 @@ SOFTWARE.
 
 typedef struct Value {
   String variable_id;
-  float  value_id;
+  float  value;
 } Value;
 
 
@@ -89,7 +90,7 @@ class TridentTD_Ubidots {
 	  
 	  String getVersion();
    private:
-	  String _version="[Trident_Ubidots] Version 1.0.1";
+	  String _version="[Trident_Ubidots] Version 1.0.2";
       char*  _token;
 	  String _current_device_id;
 	  
@@ -107,6 +108,8 @@ class TridentTD_Ubidots {
 	  
 	  bool   loadAllDevices();
 	  String getDeviceID(String device_name);
+	  String getVariableID(String variable_name);
+
 
 };
 #endif /* _TRIDENTTD_UBIDOTS_H_ */
