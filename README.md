@@ -16,4 +16,4 @@ You can use ubidots client like this
 - ubidots.getVersion();
 
 ##Version
-1.0.1
+1.0.2  Bug Fix for Ubidots 2017
