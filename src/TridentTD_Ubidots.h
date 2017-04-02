@@ -8,6 +8,7 @@
  Version 1.0.0  20/06/2559 Buddism Era  (2016)  for old ubidots interface
  Version 1.0.1  31/03/2560 Buddism Era  (2017)  for new ubidots interface
  Version 1.0.2  01/04/2560 Buddism Era  (2017)  bug fix
+ Version 1.0.3  02/04/2560 Buddism Era  (2017)
  
 
 Copyright (c) 2016 TridentTD
@@ -78,15 +79,25 @@ class TridentTD_Ubidots {
   public:
     TridentTD_Ubidots(char* token);
     bool   wificonnect(char *ssid, char *pass);
+
+    bool   loadAll();
     bool   setDevice(String device_name);
-    float  getLastValue(String variable_name);
+
+    float  getLastValue(String variable_name);  // must call setDevice() before
+    float  getLastValue(String device_name, String variable_name);  // when call loadAll()
     time_t getLastTimeStamp(String variable_name);
+    time_t getLastTimeStamp(String device_name, String variable_name);
+
     void   setValue(String variable_name, double value);
+    void   setValue(String device_name, String variable_name, double value);    
+
     bool   sendAll();  
     
+
+      
     String getVersion();
   private:
-    String  _version="[Trident_Ubidots] Version 1.0.2";
+    String  _version="[Trident_Ubidots] Version 1.0.3";
     char*   _token;
     String  _current_device_id;
     
@@ -95,6 +106,7 @@ class TridentTD_Ubidots {
     Value*  val;
     
     uint8_t   _variable_count;
+    uint8_t   _total_variable_count;
     Variable* ubidotsVariables;
     
     uint8_t   _device_count;
@@ -105,5 +117,7 @@ class TridentTD_Ubidots {
     bool   loadAllDevices();
     String getDeviceID(String device_name);
     String getVariableID(String variable_name);
+    String getVariableID(String device_name, String variable_name);
+    void   setValuebyID(String variable_id,   double value);
 };
 #endif /* _TRIDENTTD_UBIDOTS_H_ */

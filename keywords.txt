@@ -12,13 +12,14 @@ TridentTD_Ubidots	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
-wificonnect 	KEYWORD2
-setDevice 	KEYWORD2
-getLastValue 	KEYWORD2
+wificonnect 	    KEYWORD2
+loadAll           KEYWORD2
+setDevice         KEYWORD2
+getLastValue 	    KEYWORD2
 getLastTimeStamp	KEYWORD2
-setValue 	KEYWORD2
-sendAll 	KEYWORD2
-getVersion      KEYWORD2
+setValue 	        KEYWORD2
+sendAll 	        KEYWORD2
+getVersion        KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
