@@ -8,6 +8,7 @@ You can use ubidots client like this
 
 - TridentTD_Ubidots ubidots;
 - ubidots.wificonnect( ssid,password );
+- ubidots.loadAll();
 - ubidots.setDevice( ubidots\_device_name )
 - ubidots.getLastValue( ubidots\_varaible_name );
 - ubidots.getLastTimeStamp( ubidots\_varaible_name );
