@@ -11,8 +11,11 @@ You can use ubidots client like this
 - ubidots.loadAll();
 - ubidots.setDevice( ubidots\_device_name )
 - ubidots.getLastValue( ubidots\_varaible_name );
+- ubidots.getLastValue( ubidots\_device_name, ubidots\_varaible_name );
 - ubidots.getLastTimeStamp( ubidots\_varaible_name );
+- ubidots.getLastTimeStamp( ubidots\_device_name, ubidots\_varaible_name );
 - ubidots.setValue( ubidots\_variable_name, value);
+- ubidots.setValue( ubidots\_device_name, ubidots\_variable_name, value);
 - ubidots.sendAll();
 - ubidots.getVersion();
 
