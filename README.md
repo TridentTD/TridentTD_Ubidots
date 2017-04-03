@@ -31,6 +31,7 @@ Method 1
 ubidots.wificonnect( ssid,password );
 ubidots.loadAll();
 ubidots.getLastValue( ubidots_device_name, ubidots_varaible_name );
+ubidots.getLastTimeStamp( ubidots_device_name, ubidots_varaible_name );
 ubidots.setValue( ubidots_device_name, ubidots_variable_name, value);
 ubidots.sendAll();
 ```
@@ -42,6 +43,7 @@ Method 2
 ubidots.wificonnect( ssid,password );
 ubidots.setDevice( ubidots_device_name );
 ubidots.getLastValue( ubidots_varaible_name );
+ubidots.getLastTimeStamp( ubidots_varaible_name );
 ubidots.setValue( ubidots_variable_name, value);
 ubidots.sendAll();
 ```
