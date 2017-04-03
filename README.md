@@ -1,5 +1,6 @@
 ##[TridentTD] Manabu's Esp8266 IoT Library
 #TridentTD_Ubidots
+==================
 
 TridentTD_Ubidots is a library for
 http://ubidots.com/ to  receive or send data in the simplest method.
