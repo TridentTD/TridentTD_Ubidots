@@ -1,4 +1,5 @@
 [TridentTD] Manabu's Esp8266 IoT Library
+----------------------------------------
 TridentTD_Ubidots
 =================
 
